@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Colección de fotografías aéreas - Instituto de Geografía, UNAM</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/mexico_ent_WM_1.js"></script>
+        <script src="data/Demo_mosaicos_fotos_areas_2.js"></script>
+        <script src="data/Foto_3.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[19.161408677824245,-99.3827948422081],[19.492021956085512,-98.8826209647972]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var title = new L.Control({'position':'topleft'});
+        title.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        title.update = function () {
+            this._div.innerHTML = '<h2>Colección de fotografías aéreas - Instituto de Geografía, UNAM</h2>';
+        };
+        title.addTo(map);
+        var abstract = new L.Control({'position':'bottomleft'});
+        abstract.onAdd = function (map) {
+            this._div = L.DomUtil.create('div',
+            'leaflet-control abstract');
+            this._div.id = 'abstract'
+
+                abstract.show();
+                return this._div;
+            };
+            abstract.show = function () {
+                this._div.classList.remove("abstract");
+                this._div.classList.add("abstractUncollapsed");
+                this._div.innerHTML = 'Mapa web que muestra la localización de las fotografías que han sido identificados, organizadas y catalogadas, y que conforman la colección MAOP de la Biblioteca del Instituto de Geografía de la UNAM.';
+        };
+        abstract.addTo(map);
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatelliteHybrid_0');
+        map.getPane('pane_GoogleSatelliteHybrid_0').style.zIndex = 400;
+        var layer_GoogleSatelliteHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatelliteHybrid_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleSatelliteHybrid_0;
+        map.addLayer(layer_GoogleSatelliteHybrid_0);
+        function pop_mexico_ent_WM_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">NOMGEO</th>\
+                        <td>' + (feature.properties['NOMGEO'] !== null ? autolinker.link(String(feature.properties['NOMGEO']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_mexico_ent_WM_1_0() {
+            return {
+                pane: 'pane_mexico_ent_WM_1',
+                opacity: 1,
+                color: 'rgba(254,228,17,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_mexico_ent_WM_1');
+        map.getPane('pane_mexico_ent_WM_1').style.zIndex = 401;
+        map.getPane('pane_mexico_ent_WM_1').style['mix-blend-mode'] = 'normal';
+        var layer_mexico_ent_WM_1 = new L.geoJson(json_mexico_ent_WM_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_mexico_ent_WM_1',
+            layerName: 'layer_mexico_ent_WM_1',
+            pane: 'pane_mexico_ent_WM_1',
+            onEachFeature: pop_mexico_ent_WM_1,
+            style: style_mexico_ent_WM_1_0,
+        });
+        bounds_group.addLayer(layer_mexico_ent_WM_1);
+        map.addLayer(layer_mexico_ent_WM_1);
+        function pop_Demo_mosaicos_fotos_areas_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Vista mosaico</th>\
+                        <td>' + (feature.properties['PathMos'] !== null ? autolinker.link(String(feature.properties['PathMos']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Clasificación IMAGO</th>\
+                        <td>' + (feature.properties['PathIMAGO'] !== null ? autolinker.link(String(feature.properties['PathIMAGO']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Vista 3D</th>\
+                        <td>' + (feature.properties['Path3dview'] !== null ? autolinker.link(String(feature.properties['Path3dview']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Vista modelo 3D</th>\
+                        <td>' + (feature.properties['Path3dmod'] !== null ? autolinker.link(String(feature.properties['Path3dmod']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        var pattern_Demo_mosaicos_fotos_areas_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#ffffff',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Demo_mosaicos_fotos_areas_2_0.addTo(map);
+        function style_Demo_mosaicos_fotos_areas_2_0() {
+            return {
+                pane: 'pane_Demo_mosaicos_fotos_areas_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Demo_mosaicos_fotos_areas_2_0,
+                interactive: true,
+            }
+        }
+        function style_Demo_mosaicos_fotos_areas_2_1() {
+            return {
+                pane: 'pane_Demo_mosaicos_fotos_areas_2',
+                opacity: 1,
+                color: 'rgba(253,9,9,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Demo_mosaicos_fotos_areas_2');
+        map.getPane('pane_Demo_mosaicos_fotos_areas_2').style.zIndex = 402;
+        map.getPane('pane_Demo_mosaicos_fotos_areas_2').style['mix-blend-mode'] = 'normal';
+        var layer_Demo_mosaicos_fotos_areas_2 = new L.geoJson.multiStyle(json_Demo_mosaicos_fotos_areas_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Demo_mosaicos_fotos_areas_2',
+            layerName: 'layer_Demo_mosaicos_fotos_areas_2',
+            pane: 'pane_Demo_mosaicos_fotos_areas_2',
+            onEachFeature: pop_Demo_mosaicos_fotos_areas_2,
+            styles: [style_Demo_mosaicos_fotos_areas_2_0,style_Demo_mosaicos_fotos_areas_2_1,]
+        });
+        bounds_group.addLayer(layer_Demo_mosaicos_fotos_areas_2);
+        map.addLayer(layer_Demo_mosaicos_fotos_areas_2);
+        function pop_Foto_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">ID foto</th>\
+                        <td>' + (feature.properties['IDFoto'] !== null ? autolinker.link(String(feature.properties['IDFoto']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Vista foto</th>\
+                        <td>' + (feature.properties['PathFoto'] !== null ? autolinker.link(String(feature.properties['PathFoto']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Foto_3_0() {
+            return {
+                pane: 'pane_Foto_3',
+                radius: 6.4,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,241,0,1.0)',
+                interactive: true,
+            }
+        }
+        function style_Foto_3_1() {
+            return {
+                pane: 'pane_Foto_3',
+                radius: 1.4000000000000001,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(0,0,0,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Foto_3');
+        map.getPane('pane_Foto_3').style.zIndex = 403;
+        map.getPane('pane_Foto_3').style['mix-blend-mode'] = 'normal';
+        var layer_Foto_3 = new L.geoJson.multiStyle(json_Foto_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Foto_3',
+            layerName: 'layer_Foto_3',
+            pane: 'pane_Foto_3',
+            onEachFeature: pop_Foto_3,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Foto_3_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Foto_3_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_Foto_3);
+        map.addLayer(layer_Foto_3);
+        var overlaysTree = [
+            {label: '<img src="legend/Foto_3.png" /> Foto', layer: layer_Foto_3},
+            {label: '<img src="legend/Demo_mosaicos_fotos_areas_2.png" /> Demo_mosaicos_fotos_areas', layer: layer_Demo_mosaicos_fotos_areas_2},
+            {label: '<img src="legend/mexico_ent_WM_1.png" /> mexico_ent_WM', layer: layer_mexico_ent_WM_1},
+            {label: "Google Satellite Hybrid", layer: layer_GoogleSatelliteHybrid_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_mexico_ent_WM_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'NOMGEO'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"PathIMAGO": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_PathIMAGO = document.createElement('div');
+            div_PathIMAGO.id = "div_PathIMAGO";
+            div_PathIMAGO.className= "filterselect";
+            document.getElementById("menu").appendChild(div_PathIMAGO);
+            sel_PathIMAGO = document.createElement('select');
+            sel_PathIMAGO.multiple = true;
+            sel_PathIMAGO.size = 3;
+            sel_PathIMAGO.id = "sel_PathIMAGO";
+            var PathIMAGO_options_str = "<option value='' unselected></option>";
+            sel_PathIMAGO.onchange = function(){filterFunc()};
+            PathIMAGO_options_str  += '<option value="NULL">NULL</option>';
+            PathIMAGO_options_str  += '<option value="GG-MAOP INEGI 09 E14-2, E14-A18, E14-A19, E14-A29">GG-MAOP INEGI 09 E14-2, E14-A18, E14-A19, E14-A29</option>';
+            PathIMAGO_options_str  += '<option value="GG-MAOP INEGI 13 E14-A-16">GG-MAOP INEGI 13 E14-A-16</option>';
+            sel_PathIMAGO.innerHTML = PathIMAGO_options_str;
+            div_PathIMAGO.appendChild(sel_PathIMAGO);
+            var lab_PathIMAGO = document.createElement('div');
+            lab_PathIMAGO.innerHTML = 'PathIMAGO';
+            lab_PathIMAGO.className = 'filterlabel';
+            div_PathIMAGO.appendChild(lab_PathIMAGO);
+            var reset_PathIMAGO = document.createElement('div');
+            reset_PathIMAGO.innerHTML = 'clear filter';
+            reset_PathIMAGO.className = 'filterlabel';
+            reset_PathIMAGO.onclick = function() {
+                var options = document.getElementById("sel_PathIMAGO").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_PathIMAGO.appendChild(reset_PathIMAGO);
+        </script>
+    </body>
+</html>
